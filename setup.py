@@ -1,15 +1,33 @@
 import warnings
+import os
 
 from setuptools import setup
 from setuptools import Command
 from setuptools import Extension
 from Cython.Build import cythonize
 
+# Detect if we have traditional SageMath or need to use passagemath
+HAVE_TRADITIONAL_SAGE = False
+SAGE_VERSION = None
+
 try:
     import sage.env
     import sage.version
+    HAVE_TRADITIONAL_SAGE = True
+    SAGE_VERSION = sage.version.version
 except ImportError:
-    raise ValueError("this package requires SageMath")
+    # Check if we're in a passagemath environment
+    try:
+        import passagemath_environment
+        # Import minimal sage components needed for build
+        import sage.env
+        import sage.version
+        SAGE_VERSION = sage.version.version
+    except ImportError:
+        raise ValueError(
+            "This package requires either SageMath or passagemath. "
+            "For passagemath installation, use: pip install 'ore_algebra[passagemath]'"
+        )
 
 class TestCommand(Command):
     user_options = []
@@ -36,12 +54,12 @@ def do_cythonize():
             # annotate=True,
         )
 
-if list(map(int, sage.version.version.split('.')[:2])) < [10, 2]:
+if list(map(int, SAGE_VERSION.split('.')[:2])) < [10, 2]:
     # Unfortunately, pip does not display this warning by default. But we will
     # warn about this again when the user tries to call one of the affected
     # functions.
     warnings.warn(
-        f"Found SageMath version {sage.version.version}. The Cython extensions "
+        f"Found SageMath version {SAGE_VERSION}. The Cython extensions "
         "in ore_algebra now require SageMath >= 10.2. The ore_algebra package "
         "will be installed with Cython extensions disabled, making numerical "
         "evaluation and related features slow. To use the full version of "

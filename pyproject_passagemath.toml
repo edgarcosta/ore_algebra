@@ -1,0 +1,19 @@
+[build-system]
+requires = [
+  'setuptools',
+  'Cython',
+  'pkgconfig',
+  'passagemath-environment',
+  'passagemath-flint',
+  'passagemath-modules',
+]
+build-backend = "setuptools.build_meta"
+
+# This configuration file forces the use of passagemath dependencies.
+# Use this when you want to build ore_algebra in a pure passagemath environment
+# without traditional Sage. To use this:
+#
+# 1. Rename this file to pyproject.toml
+# 2. Run: pip install .
+#
+# Or directly: pip install . -C="--build-option=--config-file=pyproject_passagemath.toml"

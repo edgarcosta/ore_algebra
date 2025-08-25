@@ -161,7 +161,20 @@ from .local_solutions import (
 )
 from .path import EvaluationPoint_base, EvaluationPoint
 
-from .dac_sum_c import DACUnroller
+# Try to import the Cython extension, handle binary incompatibility gracefully
+try:
+    from .dac_sum_c import DACUnroller
+except (ImportError, AttributeError) as e:
+    import warnings
+    warnings.warn(
+        f"Failed to import Cython extension dac_sum_c: {e}. "
+        "This may be due to binary incompatibility between different Sage versions. "
+        "DAC summation will fall back to a slower pure Python implementation. "
+        "To fix this, reinstall ore_algebra with --no-build-isolation or ensure "
+        "consistent Sage/passagemath versions."
+    )
+    # Provide a fallback or dummy implementation
+    DACUnroller = None
 
 
 logger = logging.getLogger(__name__)
@@ -262,6 +275,12 @@ class HighestSolMapper_dac(HighestSolMapper):
             # the higher bit_prec.
             stop.reset(self.eps >> (self.dop.order() + 4*attempt),
                        stop.fast_fail and ini_are_accurate)
+            if DACUnroller is None:
+                raise RuntimeError(
+                    "DACUnroller Cython extension is not available due to binary "
+                    "incompatibility. Please reinstall ore_algebra with "
+                    "--no-build-isolation or ensure consistent Sage/passagemath versions."
+                )
             unr = DACUnroller(self.dop_T, inis, self.evpts, sums_prec, bit_prec,
                               ctx=self.ctx)
             CCp = ComplexBallField(bit_prec)
@@ -387,6 +406,12 @@ def truncated_series(dop, inis, bit_prec, terms):
         if not isinstance(inis[i], LogSeriesInitialValues):
             inis[i] = LogSeriesInitialValues(ZZ.zero(), inis[i], dop)
     evpts = EvaluationPoint([])
+    if DACUnroller is None:
+        raise RuntimeError(
+            "DACUnroller Cython extension is not available due to binary "
+            "incompatibility. Please reinstall ore_algebra with "
+            "--no-build-isolation or ensure consistent Sage/passagemath versions."
+        )
     unr = DACUnroller(dop_T, inis, evpts, bit_prec, bit_prec, keep_series=True)
     unr.sum_blockwise(stop=None, max_terms=terms)
     Series = dop.base_ring().change_ring(ComplexBallField(bit_prec))
@@ -439,6 +464,12 @@ def truncated_sum(dop, ini, evpts, bit_prec, terms):
         evpts = EvaluationPoint(evpts)
     # XXX accept a sums_prec here? or compute it based on
     # utilities.input_accuracy(self.evpts, inis)?
+    if DACUnroller is None:
+        raise RuntimeError(
+            "DACUnroller Cython extension is not available due to binary "
+            "incompatibility. Please reinstall ore_algebra with "
+            "--no-build-isolation or ensure consistent Sage/passagemath versions."
+        )
     unr = DACUnroller(dop_T, [ini], evpts, bit_prec, bit_prec)
     unr.sum_blockwise(stop=None, max_terms=terms)
     CCp = ComplexBallField(bit_prec)
@@ -461,6 +492,12 @@ class HighestSolMapper_dac_truncated(HighestSolMapper):
     def do_sum(self, inis):
         # XXX accept a sums_prec here? or compute it based on
         # utilities.input_accuracy(self.evpts, inis)?
+        if DACUnroller is None:
+            raise RuntimeError(
+                "DACUnroller Cython extension is not available due to binary "
+                "incompatibility. Please reinstall ore_algebra with "
+                "--no-build-isolation or ensure consistent Sage/passagemath versions."
+            )
         unr = DACUnroller(self.dop_T, inis, self.evpts,
                           self.bit_prec, self.bit_prec,
                           ctx=self.ctx)
