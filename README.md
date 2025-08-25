@@ -128,7 +128,7 @@ mismatches between passagemath and traditional Sage installations. To fix this:
 
 1. Reinstall with `--no-build-isolation` to use your local Sage environment:
    ```
-   pip install --no-build-isolation "git+https://github.com/mkauers/ore_algebra.git[passagemath]"
+   pip install --no-build-isolation "git+https://github.com/mkauers/ore_algebra.git"
    ```
 
 2. Or ensure consistent versions by using either pure passagemath or pure traditional Sage.
