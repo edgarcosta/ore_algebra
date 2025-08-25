@@ -120,6 +120,19 @@ This automatically installs the modularized parts of the Sage library that are
 needed by the package. (These modularized distributions are provided by
 https://github.com/passagemath.)
 
+**Note about binary compatibility:** If you experience import errors or warnings
+about binary incompatibilities when using ore_algebra (such as 
+"AttributeError: module 'sage.categories.morphism' has no attribute 'SetIsomorphism'"
+or "RuntimeWarning: sage.rings.ring.Ring size changed"), this may be due to version
+mismatches between passagemath and traditional Sage installations. To fix this:
+
+1. Reinstall with `--no-build-isolation` to use your local Sage environment:
+   ```
+   pip install --no-build-isolation "git+https://github.com/mkauers/ore_algebra.git"
+   ```
+
+2. Or ensure consistent versions by using either pure passagemath or pure traditional Sage.
+
 Documentation
 -------------
 
